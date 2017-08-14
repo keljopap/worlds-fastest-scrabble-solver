@@ -1,0 +1,8 @@
+4
+1 run
+9 gun
+40 go
+81 bull
+2
+113 ache
+59 satellite
