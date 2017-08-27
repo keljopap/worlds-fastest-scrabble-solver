@@ -1,8 +1,19 @@
-4
-1 run
-9 gun
-40 go
-81 bull
-2
-113 ache
-59 satellite
+10
+0 2 combed
+3 0 joe
+4 0 or
+5 0 ka
+6 0 et
+7 0 seven
+6 6 hails
+7 10 aying
+8 4 orzo
+10 10 ta
+7
+0 2 cafe
+3 0 jokes
+3 1 orate
+7 4 no
+6 7 atonal
+4 10 assault
+10 11 arf
