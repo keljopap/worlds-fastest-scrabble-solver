@@ -1,3 +1,4 @@
+#include "Utility.h"
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -53,21 +54,64 @@ void set_rack(char rack[]) {
 }
 
 void add_word(int row, int col, string word, char orientation) {
-    switch(orientation) {
-        case 'a':
-            if (col + word.length() < NUM_COLS && row < NUM_ROWS) {
-                for (int i = 0; i < word.length(); i++) {
-                    scrabble_board[row][col+i] = word[i];
-                }
-            }
-            break;
-        case 'd':
-            if (row + word.length() < NUM_ROWS && col < NUM_COLS) {
-                for (int i = 0; i < word.length(); i++) {
-                    scrabble_board[row+i][col] = word[i];
-                }
-            }
-            break;
+
+	char test;
+
+	try {
+	    switch(orientation) {
+	        case 'a':
+	            if (col + word.length() < NUM_COLS && row < NUM_ROWS) {
+	                for (int i = 0; i < word.length(); i++) {
+	                	test = scrabble_board[row][col+i];
+	                	if (test != word[i] &&
+	                		test != '|' &&
+	                		test != '_') {
+
+	                		throw Error("You can't play on top of letter " +
+	                			std::to_string(test) + " at (" + std::to_string(row) + ", " +
+	                			std::to_string(col + i) + ")");
+	                	}
+	                }
+	                for (int i = 0; i < word.length(); i++)
+	                    scrabble_board[row][col+i] = word[i];
+	            }
+	            break;
+	        case 'd':
+	            if (row + word.length() < NUM_ROWS && col < NUM_COLS) {
+	                for (int i = 0; i < word.length(); i++) {
+	                	test = scrabble_board[row+i][col];
+	                	if (test != word[i] &&
+	                		test != '|' &&
+	                		test != '_') {
+
+	                		throw Error("You can't play on top of letter " +
+	                			std::to_string(test) + " at (" + std::to_string(row+i) + ", " +
+	                			std::to_string(col) + ")");
+	                	}
+	                }
+	                for (int i = 0; i < word.length(); i++)
+	                    scrabble_board[row+i][col] = word[i];
+	            }
+	            break;
+	    }
+	} catch (Error &e) {
+		cout << e.what() << endl;
+	}
+}
+
+// Helper functions for validating command input
+static void read_int_persistently(int &x) {
+   	
+   	while (cin.good()) {
+    	try {
+   			if (!(cin >> x))
+	        	throw Error("Expected an integer!");
+    		break;
+    	} catch (Error &e) {
+    		cout << e.what() << endl;
+            cin.clear();
+            cin.ignore (numeric_limits<streamsize>::max(), '\n');
+    	}
     }
 }
 
@@ -78,42 +122,31 @@ void set_board() {
     // This is where user can provide #across words followed by that #lines "{start pos} {word}",
     //                                #down words followed by that #lines "{start pos} {word}" (.txt file)
 
-    string line;
+    string word;
+
     int across_words = 0;
-    int down_words = 0;
-
-    getline(cin, line);
-    across_words = std::stoi(line);
-    cout << "across: " << across_words << endl;
-
+    cout << "Enter words across:\n";
+    read_int_persistently(across_words);
+    cout << "# words across: " << across_words << endl;
     while (across_words-- > 0) {
-        getline(cin, line);
-        
-        cout << idx++ << ") " << line << endl;
-        istringstream iss(line);
         int row = NUM_ROWS, col = NUM_COLS;
-        iss >> row >> col;
-        string word;
-        iss >> word;
+        read_int_persistently(row);
+        read_int_persistently(col);
+        cin >> word;
         add_word(row, col, word, 'a');
     }
 
-    getline(cin, line);
-    down_words = std::stoi(line);
-    cout << "down: " << down_words << endl;
-
+    int down_words = 0;
+    cout << "Enter words down:\n";
+    read_int_persistently(down_words);
+    cout << "# words down: " << down_words << endl;
     while (down_words-- > 0) {
-        getline(cin, line);
-        cout << idx++ << ") " << line << endl;
-
-        istringstream iss(line);
         int row = NUM_ROWS, col = NUM_COLS;
-        iss >> row >> col;
-        string word;
-        iss >> word;
+        read_int_persistently(row);
+        read_int_persistently(col);
+        cin >> word;
         add_word(row, col, word, 'd');
     }
-    cout << endl;
 }
 
 int main(int argc, char* argv[]) {
@@ -134,19 +167,16 @@ int main(int argc, char* argv[]) {
         bitset<M> dawg(string("1100"));
         cout << dawg << ' ' << sizeof(dawg) << endl;
 
-        int tile = 1;
+        //int tile = 1;
+        int tile = 0;
         for (int i = 0; i < NUM_ROWS; i++) {
-                for (int j = 0; j < NUM_COLS; j++) {
-                        tile = 1 + (i*NUM_ROWS)+j;
-                        if (tile < argc) {
-                                scrabble_board[i][j] = *argv[tile];
-                        } else if (tile == 113) {
+                for (int j = 0; j < NUM_COLS; j++, tile++) {
+                        if (tile == 113)
                                 scrabble_board[i][j] = '*';
-                        } else if (tile%2==0) {
+                        else if (tile % 2 == 0)
                                 scrabble_board[i][j] = '|';
-                        } else {
+                        else
                                 scrabble_board[i][j] = '_';
-                        }
                 }
         }
 
